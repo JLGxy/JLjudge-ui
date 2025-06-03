@@ -1,5 +1,6 @@
 import { createRoute } from "@tanstack/react-router";
 import { RootRoute } from "./__root";
+import ProblemPage from "@/pages/ProblemPage";
 import HomePage from "../pages/HomePage";
 import SecondPage from "@/pages/SecondPage";
 
@@ -28,10 +29,16 @@ export const HomeRoute = createRoute({
   component: HomePage,
 });
 
+export const ProblemPageRoute = createRoute({
+  getParentRoute: () => RootRoute,
+  path: "/problem-page",
+  component: ProblemPage,
+});
+
 export const SecondPageRoute = createRoute({
   getParentRoute: () => RootRoute,
   path: "/second-page",
   component: SecondPage,
 });
 
-export const rootTree = RootRoute.addChildren([HomeRoute, SecondPageRoute]);
+export const rootTree = RootRoute.addChildren([HomeRoute, ProblemPageRoute, SecondPageRoute]);

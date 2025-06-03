@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import LangToggle from "@/components/LangToggle";
 import Footer from "@/components/template/Footer";
 import InitialIcons from "@/components/template/InitialIcons";
+import OpenContest from "@/components/OpenContest"
 
 export default function HomePage() {
   const { t } = useTranslation();
@@ -19,7 +20,10 @@ export default function HomePage() {
           </p>
         </span>
         <LangToggle />
-        <ToggleTheme />
+        <div className="flex flex-row gap-2 mt-1">
+          <OpenContest />
+          <ToggleTheme />
+        </div>
       </div>
       <Footer />
     </div>
