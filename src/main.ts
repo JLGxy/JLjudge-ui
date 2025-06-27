@@ -79,16 +79,74 @@ function chooseContest() {
 }
 
 app.whenReady().then(() => {
-  ipcMain.handle('getProblemConfig', (event, filePath) => {
+  ipcMain.handle('getProblemConfig', (event, contestPath, problem) => {
     try {
-      const doc = yaml.load(fs.readFileSync(filePath, 'utf8'));
-      return doc;
+      const doc = yaml.load(fs.readFileSync(path.join(contestPath, "data", problem, "conf.yaml"), 'utf8'));
+      return {
+        probname: doc.name,
+        probtype: doc.type,
+        compilers: doc.compilers,
+        use_file_input: doc.input_file !== '',
+        input_file: doc.input_file,
+        use_file_output: doc.output_file !== '',
+        output_file: doc.output_file,
+        checker: doc.checker,
+        checker_compiler: doc.checker_compiler,
+        interactor: doc?.interactor || '',
+        interactor_compiler: doc?.interactor_compiler || '',
+      };
+    } catch (e) {
+      console.error(e);
+    }
+  });
+  ipcMain.handle('updateProblemConfig', (event, contestPath, problem, config) => {
+    console.log("Updating problem config", contestPath, problem);
+    try {
+      fs.writeFileSync(path.join(contestPath, "data", problem, "conf.yaml"), yaml.dump({
+        name: problem,
+        type: config.probtype,
+        compilers: config.compilers,
+        input_file: config.use_file_input ? config.input_file : '',
+        output_file: config.use_file_output ? config.output_file : '',
+        checker: config.checker,
+        checker_compiler: config.checker_compiler,
+        interactor: config.probtype == "interactive"? config.interactor: undefined,
+        interactor_compiler: config.probtype == "interactive"? config.interactor_compiler: undefined,
+      }), 'utf8');
+      return true;
+    } catch (e) {
+      console.error(e);
+      return false;
+    }
+  });
+  ipcMain.handle('getContestConfig', (event, contestPath) => {
+    try {
+      const doc = yaml.load(fs.readFileSync(path.join(contestPath, "data", "contest.yaml"), 'utf8'));
+      return {
+        problems: doc.problems as string[],
+        compilers: doc.compilers as {
+          name: string,
+          path: string,
+          args: string[],
+          suffixes: string[],
+        }[],
+      };
     } catch (e) {
       console.error(e);
     }
   });
   ipcMain.handle('chooseContest', () => {
     return chooseContest();
+  });
+  ipcMain.handle('getProblemList', (event, contestPath) => {
+    const problemList: string[] = [];
+    const items = fs.readdirSync(path.join(contestPath, "data"));
+    items.forEach(item => {
+      if (fs.statSync(path.join(contestPath, "data", item)).isDirectory() && fs.statSync(path.join(contestPath, "data", item, "conf.yaml"), { throwIfNoEntry: false })?.isFile()) {
+        problemList.push(item);
+      }
+    });
+    return problemList;
   });
   createWindow();
 }).then(installExtensions);

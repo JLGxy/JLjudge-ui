@@ -9,7 +9,6 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 
-import { ProblemConfigPage } from "./comp"
 import React from "react"
 
 export default function Page() {
@@ -35,7 +34,6 @@ export default function Page() {
       </div>
     </header>
     <div>
-      <ProblemConfigPage />
     </div>
   </div>
   )

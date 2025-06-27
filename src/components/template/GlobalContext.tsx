@@ -1,3 +1,4 @@
+import { useLocation } from "@tanstack/react-router";
 import React from "react";
 
 const globalContext = React.createContext<{
@@ -17,8 +18,15 @@ export function GlobalContextProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [contestName, setContestName] = React.useState<string>("");
-  const [contestPath, setContestPath] = React.useState<string>("");
+  const location = useLocation();
+  const { contest } = location.state;
+
+  const [contestName, setContestName] = React.useState<string>(contest?.split("/")?.pop() || contest);
+  const [contestPath, setContestPath] = React.useState<string>(contest);
+  React.useEffect(() => {
+    setContestName(contest?.split("/")?.pop() || contest);
+    setContestPath(contest);
+  }, [contest]);
   return (
     <globalContext.Provider value={{
       contestName: contestName,

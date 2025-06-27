@@ -6,8 +6,9 @@ import {
   SidebarInset,
   SidebarProvider,
 } from "@/components/ui/sidebar"
-import { Toaster } from "@/components/ui/sonner"
+import { Toaster, ToasterProps } from "@/components/ui/sonner"
 import { GlobalContextProvider } from "@/components/template/GlobalContext";
+import BottomStatusBar from "@/components/BottomStatusBar";
 
 export default function BaseLayout({
   children,
@@ -15,8 +16,8 @@ export default function BaseLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div>
-      <DragWindowRegion title="electron-shadcn" />
+    <div className="flex h-screen w-screen flex-col overflow-hidden">
+      <DragWindowRegion title="" />
       {/* <NavigationMenu /> */}
       <GlobalContextProvider>
         <SidebarProvider>
@@ -25,8 +26,9 @@ export default function BaseLayout({
             {children}
           </SidebarInset>
         </SidebarProvider>
+        <BottomStatusBar />
       </GlobalContextProvider>
-      <Toaster expand={true} />
+      <Toaster expand={true} theme={"dark" as ToasterProps["theme"]}/>
     </div>
   );
 }

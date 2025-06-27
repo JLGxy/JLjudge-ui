@@ -35,10 +35,16 @@ export const ProblemPageRoute = createRoute({
   component: ProblemPage,
 });
 
+export const ContestPageRoute = createRoute({
+  getParentRoute: () => RootRoute,
+  path: "/contest-page",
+  component: ProblemPage,
+});
+
 export const SecondPageRoute = createRoute({
   getParentRoute: () => RootRoute,
   path: "/second-page",
   component: SecondPage,
 });
 
-export const rootTree = RootRoute.addChildren([HomeRoute, ProblemPageRoute, SecondPageRoute]);
+export const rootTree = RootRoute.addChildren([HomeRoute, ProblemPageRoute, ContestPageRoute, SecondPageRoute]);

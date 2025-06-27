@@ -14,6 +14,9 @@ contextBridge.exposeInMainWorld('versions', {
 })
 
 contextBridge.exposeInMainWorld('judge', {
-  getProblemConfig: (filePath: string) => ipcRenderer.invoke('getProblemConfig', filePath),
+  getProblemConfig: (contestPath: string, problem: string) => ipcRenderer.invoke('getProblemConfig', contestPath, problem),
   chooseContest: () => ipcRenderer.invoke('chooseContest'),
+  updateProblemConfig: (contestPath: string, problem: string, config: object) => ipcRenderer.invoke('updateProblemConfig', contestPath, problem, config),
+  getProblemList: (contestPath: string) => ipcRenderer.invoke('getProblemList', contestPath),
+  getContestConfig: (contestPath: string) => ipcRenderer.invoke('getContestConfig', contestPath),
 })

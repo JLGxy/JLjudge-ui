@@ -11,8 +11,9 @@ async function chooseContest(navigate: ReturnType<typeof useNavigate>) {
   console.log(contest);
   if(contest === undefined) {
     toast.error("Failed to open.");
+  } else {
+    navigate({to: "/problem-page", state: { contest: contest } });
   }
-  navigate({to: "/problem-page", state: { contest: contest } });
 }
 
 export default function OpenContest() {

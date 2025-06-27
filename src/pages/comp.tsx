@@ -6,6 +6,7 @@ import {
   useContext,
   Dispatch,
   SetStateAction,
+  useEffect,
 } from "react"
 
 import { Check, ChevronsUpDown } from "lucide-react"
@@ -39,13 +40,12 @@ import {
   MultiSelectorTrigger
 } from "@/components/ui/multi-select"
 import { Terminal } from "lucide-react"
-
 import {
   Alert,
   AlertDescription,
   AlertTitle,
 } from "@/components/ui/alert"
-
+import { toast } from "sonner"
 
 import { ProblemSelect } from "@/components/problem-select"
 
@@ -53,6 +53,7 @@ import React from "react"
 import { useLocation, useNavigate } from "@tanstack/react-router"
 
 import { useGlobalContext } from "@/components/template/GlobalContext"
+import { updateProblems } from "@/components/problem-select"
 
 interface problemconfig {
   probname: string
@@ -68,19 +69,12 @@ interface problemconfig {
   interactor_compiler: string
 }
 
-interface compilerconfig {
+export interface compilerconfig {
   name: string
   path: string
   args: string[]
   suffixes: string[]
 }
-
-const func = async () => {
-  const response = await window.judge.getProblemConfig('/home/galaxy/contest/data/contest.yaml');
-  console.log(response) // 打印 'pong'
-}
-
-func()
 
 export const UserContext = createContext({
   config: {} as problemconfig,
@@ -90,6 +84,7 @@ export const UserContext = createContext({
   setCurProb: {} as Dispatch<SetStateAction<string>>,
   problems: {} as { value: string, label: string }[],
   setProblems: {} as Dispatch<SetStateAction<{ value: string, label: string }[]>>,
+  setCompilers: {} as Dispatch<SetStateAction<compilerconfig[]>>,
 });
 
 function useProbConfig() {
@@ -312,7 +307,7 @@ export function ProblemConfig() {
     <>
       <div className="flex flex-1 flex-col gap-2 p-4 pt-0">
         <Label htmlFor="probname">Problem Name</Label>
-        <Input type="text" id="probname" value={config?.probname} onChange={e => {
+        <Input disabled type="text" id="probname" value={config?.probname} onChange={e => {
           setConfig({ ...config, probname: e.target.value })
         }} />
       </div>
@@ -413,7 +408,7 @@ export function AlertDemo() {
 
 export function ProblemConfigPage() {
   const [config, setConfig] = useState<problemconfig>({
-    probname: '',
+    probname: 'aa',
     probtype: '',
     compilers: [],
     use_file_input: false,
@@ -431,55 +426,37 @@ export function ProblemConfigPage() {
   ]);
 
   const [curProb, setCurProb] = useState("");
-  const { contestPath, setContestPath } = useGlobalContext();
+  const { contestPath } = useGlobalContext();
 
-  const location = useLocation();
-  const { contest }  = location.state;
+  useEffect(() => {
+    window.judge.updateProblemConfig(contestPath, curProb, config).then((saved: boolean) => {
+      if (!saved) {
+        toast.error("Failed to save");
+      }
+    });
+  }, [config]);
 
-  const navigate = useNavigate();
-  if(!contest?.length) {
-    navigate({to: "/"});
-  }
+  // const problemChoice = window.judge.getProblemList(contestPath);
 
-  const { contestName, setContestName } = useGlobalContext();
+  const [problems, setProblems] = useState<{ value: string, label: string }[]>([]);
 
-  if(contestName.length == 0) {
-    setContestName(contest.split("/").pop() || contest);
-  }
-  
-  if(contestPath.length == 0) {
-    setContestPath(contest);
-  }
+  useEffect(() => {updateProblems(contestPath, setProblems, setCompilers)}, []);
+  useEffect(() => {
+    if (curProb) {
+      window.judge.getProblemConfig(contestPath, curProb).then((config: problemconfig) => {
+        console.log("Problem config:", config);
+        setConfig(config);
+      });
+    }
+  }, [curProb]);
 
-  const [problems, setProblems] = React.useState<{ value: string, label: string }[]>([
-    {
-      value: "next.js",
-      label: "Next.js",
-    },
-    {
-      value: "sveltekit",
-      label: "SvelteKit",
-    },
-    {
-      value: "nuxt.js",
-      label: "Nuxt.js",
-    },
-    {
-      value: "remix",
-      label: "Remix",
-    },
-    {
-      value: "astro",
-      label: "Astro",
-    },
-  ]);
-
+  console.log(compilers);
   // setProblems(problemtype_choose);
 
   return (
-    <UserContext.Provider value={{ config, setConfig, compilers, curProb, setCurProb, problems, setProblems }}>
+    <UserContext.Provider value={{ config, setConfig, compilers, curProb, setCurProb, problems, setProblems, setCompilers }}>
       <div className="flex flex-1 flex-col gap-2 p-4 pt-0">
-        <p className="text-gray-700 text-sm">contest: {contest}</p>
+        <p className="text-gray-700 text-sm">contest: {contestPath}</p>
         <ProblemSelect />
       </div>
       {curProb ? <ProblemConfig /> : <AlertDemo />}
